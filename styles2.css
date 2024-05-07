@@ -1,0 +1,97 @@
+body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .mensaje-bienvenida {
+            text-align: left;
+        }
+        .titulo {
+            text-align: center;
+            margin: 0;
+        }
+        .dropdown {
+            position: relative;
+        }
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+            z-index: 1;
+            right: 0;
+        }
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        .container-align-left {
+            display: flex;
+            margin: 20px;
+            margin-bottom: 100px; /* Margen inferior para dejar espacio al footer */
+        }
+        .datos {
+            flex: 1;
+            margin-right: 20px;
+        }
+        .datos-box {
+            margin-bottom: 10px;
+        }
+        .modificar-btn, button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .campo-modificar {
+            display: none;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            text-align: center;
+        }
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #f9f9f9;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .cancelar-btn {
+            background-color: #dc3545; /* Color rojo */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        
+        .cancelar-btn:hover {
+            background-color: #c82333; /* Color rojo más oscuro al pasar el cursor */
+        }
