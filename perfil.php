@@ -10,6 +10,8 @@ $nombre = $_SESSION['nombre'];
 $correo = $_SESSION['correo'];
 $telefono = $_SESSION['telefono'];
 $boleta = $_SESSION['boleta'];
+$id = $_SESSION['id']; // Obtener el valor de "id" de la sesión
+
 ?>
 
 <!DOCTYPE html>
@@ -28,9 +30,13 @@ $boleta = $_SESSION['boleta'];
         <div class="dropdown">
             <button class="dropbtn">Menú</button>
             <div class="dropdown-content">
-                <a href="inicio.php">Inicio</a>
-                <a href="#">Perfil</a>
-                <a href="#">Protocolo</a>
+                <?php if ($id == 0) : ?>
+                    <a href="lista_protocolos.php">Lista Protocolos</a>
+                <?php endif; ?>
+                <a href="perfil.php">Perfil</a>
+                <a href="registro2.php">Protocolo</a>
+                <a href="login.php">Cerrar Sesión</a>
+                <a href="visualizador.php">Visualizador</a>
             </div>
         </div>
     </div>
@@ -38,7 +44,6 @@ $boleta = $_SESSION['boleta'];
     <div class="container-align-left">
         <div class="datos">
             <div class="datos-box">
-                <p><strong>Nombre:</strong> <span id="nombre"><?php echo $nombre; ?></span></p>
                 <p><strong>Correo:</strong> <?php echo $correo; ?></p>
                 <p><strong>Teléfono:</strong> <span id="telefono"><?php echo $telefono; ?></span></p>
                 <p><strong>Boleta:</strong> <span id="boleta"><?php echo $boleta; ?></span></p>
