@@ -1,0 +1,62 @@
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+}
+
+.titulo {
+    font-size: 24px;
+}
+
+.botones a {
+    color: #fff;
+    margin-left: 10px;
+}
+
+main {
+    margin: 20px auto;
+    width: 80%;
+}
+
+.tabla {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+th {
+    background-color: #333;
+    color: #fff;
+}
+
+select {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-radius: 4px;
+    background-color: #f1f1f1;
+}
+.mensaje {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background-color: green;
+    color: white;
+    text-align: center;
+    line-height: 50px;
+    z-index: 9999;
+}
+
+.oculto {
+    display: none;
+}
