@@ -22,7 +22,7 @@
                         errorMessage.style.padding = '10px';
                         form.insertBefore(errorMessage, form.firstChild);
                     } else {
-                        window.location.href = 'inicio.php';
+                        window.location.href = 'perfil.php';
                     }
                 });
             });

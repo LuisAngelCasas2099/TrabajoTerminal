@@ -33,10 +33,14 @@ $id = $_SESSION['id']; // Obtener el valor de "id" de la sesión
                 <?php if ($id == 0) : ?>
                     <a href="lista_protocolos.php">Lista Protocolos</a>
                 <?php endif; ?>
+                <?php if ($id == 2 || $id == 3) : ?>
+                    <a href="alta_profesores.php">Alta de profesores</a>
+                <?php endif; ?>
                 <a href="perfil.php">Perfil</a>
-                <a href="registro2.php">Protocolo</a>
+                <a href="registroProtocolo.php">Registro de Protocolo</a>
                 <a href="login.php">Cerrar Sesión</a>
                 <a href="visualizador.php">Visualizador</a>
+                <a href="evaluacionProtocolos.php">Evaluacion Protocolos </a>
             </div>
         </div>
     </div>
@@ -46,7 +50,7 @@ $id = $_SESSION['id']; // Obtener el valor de "id" de la sesión
             <div class="datos-box">
                 <p><strong>Correo:</strong> <?php echo $correo; ?></p>
                 <p><strong>Teléfono:</strong> <span id="telefono"><?php echo $telefono; ?></span></p>
-                <p><strong>Boleta:</strong> <span id="boleta"><?php echo $boleta; ?></span></p>
+                <p><?php if ($id == 0) : ?><strong>Boleta:</strong> <span id="boleta"><?php echo $boleta; ?></span><?php endif; ?></p>
                 <button class="modificar-btn" onclick="habilitarEdicion()">Modificar Datos</button>
                 <div id="contenedor-modificar" class="campo-modificar">
                     <label for="nuevo-nombre">Nuevo Nombre:</label>
@@ -84,12 +88,6 @@ $id = $_SESSION['id']; // Obtener el valor de "id" de la sesión
             <button class="modificar-btn" onclick="confirmarCambios()">Confirmar</button>
         </div>
     </div>
-
-    <footer>
-        <div class="footer">
-            <p>Desarrollado para la Escuela Superior de Computo</p>
-        </div>
-    </footer>
 
     <script>
         function habilitarEdicion() {

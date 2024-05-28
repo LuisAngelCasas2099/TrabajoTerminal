@@ -17,7 +17,7 @@ $resultado = mysqli_query($conexion, $query);
         </div>
         <div class="botones">
             <a href="perfil.php">Perfil</a>
-            <a href="cerrar_sesion.php">Cerrar sesión</a>
+            <a href="login.php">Cerrar sesión</a>
         </div>
     </header>
 
@@ -41,7 +41,7 @@ $resultado = mysqli_query($conexion, $query);
                         <td><?php echo $fila['apellido']; ?></td>
                         <td><?php echo $fila['correo']; ?></td>
                         <td>
-                            <select name="menu1">
+                            <select name="menu1_<?php echo $fila['correo']; ?>">
                                 <option value="">Nulo</option>
                                 <?php for ($i = 1; $i <= 11; $i++) { ?>
                                     <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
@@ -49,7 +49,7 @@ $resultado = mysqli_query($conexion, $query);
                             </select>
                         </td>
                         <td>
-                            <select name="menu2">
+                            <select name="menu2_<?php echo $fila['correo']; ?>">
                                 <option value="">Nulo</option>
                                 <?php for ($i = 1; $i <= 11; $i++) { ?>
                                     <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
@@ -57,7 +57,7 @@ $resultado = mysqli_query($conexion, $query);
                             </select>
                         </td>
                         <td>
-                            <select name="menu3">
+                            <select name="menu3_<?php echo $fila['correo']; ?>">
                                 <option value="">Nulo</option>
                                 <?php for ($i = 1; $i <= 11; $i++) { ?>
                                     <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
@@ -65,7 +65,7 @@ $resultado = mysqli_query($conexion, $query);
                             </select>
                         </td>
                         <td>
-                            <button class="guardar" value="<?php echo $fila['id']; ?>">Guardar</button>
+                            <button class="guardar" value="<?php echo $fila['correo']; ?>">Guardar</button>
                         </td>
                     </tr>
                 <?php } ?>
@@ -73,20 +73,16 @@ $resultado = mysqli_query($conexion, $query);
         </table>
     </main>
 
-    <footer>
-        <p>Derechos reservados 2021</p>
-    </footer>
-
     <script>
         const botonesGuardar = document.querySelectorAll('.guardar');
         botonesGuardar.forEach(boton => {
             boton.addEventListener('click', () => {
-                const id = boton.value;
-                const menu1 = boton.parentNode.parentNode.querySelector('[name="menu1"]').value;
-                const menu2 = boton.parentNode.parentNode.querySelector('[name="menu2"]').value;
-                const menu3 = boton.parentNode.parentNode.querySelector('[name="menu3"]').value;
+                const correo = boton.value;
+                const menu1 = boton.parentNode.parentNode.querySelector('[name="menu1_' + correo + '"]').value;
+                const menu2 = boton.parentNode.parentNode.querySelector('[name="menu2_' + correo + '"]').value;
+                const menu3 = boton.parentNode.parentNode.querySelector('[name="menu3_' + correo + '"]').value;
                 const datos = new FormData();
-                datos.append('id', id);
+                datos.append('correo', correo);
                 datos.append('menu1', menu1);
                 datos.append('menu2', menu2);
                 datos.append('menu3', menu3);
