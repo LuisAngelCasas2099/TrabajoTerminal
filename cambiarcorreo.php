@@ -37,7 +37,7 @@
             try {
                 $conexion = new PDO($dsn, $usuario, $contrasena_bd, $opciones);
 
-                $consulta = $conexion->prepare("SELECT * FROM usuarios WHERE correo = :correo AND password = :"password");
+                $consulta = $conexion->prepare("SELECT * FROM usuarios WHERE correo = :correo AND password = :password);
                 $consulta->bindParam(':correo', $correo_anterior);
                 $consulta->bindParam(':password', $password);
                 $consulta->execute();

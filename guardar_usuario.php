@@ -14,23 +14,13 @@ if ($conn->connect_error) {
 
 // Recibir los datos del formulario
 $nombre = $_POST['nombre'];
-$apellido = $_POST['apellido'];
 $boleta = $_POST['boleta'];
 $correo = $_POST['correo'];
 $telefono = $_POST['telefono'];
 $contrasena = $_POST['contrasena'];
 
-// Verificar el correo para asignar el identificador
-$id = 0; // Valor por defecto
-
-if (strpos($correo, "@alumno.ipn.mx") !== false) {
-    $id = 1;
-} elseif (strpos($correo, "@ipn.mx") !== false) {
-    $id = 0;
-}
-
-// Insertar los datos en la base de datos con el identificador correspondiente
-$sql = "INSERT INTO usuarios (nombre, apellido, boleta, correo, telefono, contrasena, id) VALUES ('$nombre', '$apellido','$boleta', '$correo', '$telefono', '$contrasena', '$id')";
+// Insertar los datos en la base de datos
+$sql = "INSERT INTO usuarios (nombre, boleta, correo, telefono, contrasena) VALUES ('$nombre', '$boleta', '$correo', '$telefono', '$contrasena')";
 
 if ($conn->query($sql) === TRUE) {
     echo "Usuario registrado exitosamente.";
@@ -38,7 +28,6 @@ if ($conn->query($sql) === TRUE) {
     exit;
 } else {
     echo "Error al registrar el usuario: " . $conn->error;
-    header("Location: guardar_usuario.php");
 }
 
 $conn->close();

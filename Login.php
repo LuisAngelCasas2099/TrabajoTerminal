@@ -31,28 +31,26 @@
 </head>
 <body>
     <div class="header">
-        <img src="Logo_Escom.png" class="logo-left">
         <h1>Sistema de gestión de protocolos de titulación</h1>
-        <img src="Logo_Ipn.png" class="logo-right">
     </div>
 
     <div class="container">
         <h2>Iniciar Sesión</h2>
         <form id="loginForm" method="post">
             <label for="correo">Correo:</label>
-            <input type="text" id="correo" name="correo"><br><br>
+            <input type="text" id="correo" name="correo" required><br>
             
-            <label for="contraseña">Contraseña:</label>
-            <input type="password" id="contrasena" name="contrasena"><br><br>
+            <label for="contrasena">Contraseña:</label>
+            <input type="password" id="contrasena" name="contrasena" required><br>
             
             <input type="submit" value="Iniciar Sesión">
         </form>
         <br>
-        <a href="RecuperarContraseña.php">Recuperar contraseña</a> | <a href="registrarse.php">Registrarse</a>
+        <a href="RecuperarContraseña.php">¿Olvidaste tu contraseña?</a> | <a href="registrarse.php">Registrarse</a>
     </div>
 
     <div class="footer">
-        <p>Desarrollado para la Escuela Superior de Computo</p>
+        <p>Desarrollado para la Escuela Superior de Cómputo</p>
     </div>
 </body>
 </html>

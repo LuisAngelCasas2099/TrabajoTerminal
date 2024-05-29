@@ -23,8 +23,6 @@
     <form action="guardar_usuario.php" method="post">
         <label for="nombre">Nombre:</label>
         <input type="text" id="nombre" name="nombre" required><br><br>
-        <label for="apellido">Apellidos:</label>
-        <input type="text" id="apellido" name="apellido" required><br><br>
         <label for="boleta">Número de boleta:</label>
         <input type="text" id="boleta" name="boleta" pattern="[0-9]{1,10}" title="Solo se permiten números y máximo 10 dígitos" oninput="limitarLongitud(this, 10)" required><br><br>
         <label for="correo">Correo:</label>

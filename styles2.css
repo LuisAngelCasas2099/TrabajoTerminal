@@ -74,6 +74,14 @@ body {
             width: 50%;
             text-align: center;
         }
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: #f9f9f9;
+            padding: 10px 0;
+            text-align: center;
+        }
         .cancelar-btn {
             background-color: #dc3545; /* Color rojo */
             color: white;

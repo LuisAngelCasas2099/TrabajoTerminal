@@ -2,7 +2,7 @@
 // Verificar si se ha enviado el formulario
 if(isset($_POST['submit'])) {
     // Obtener el correo electrónico enviado desde el formulario
-    $email = $_POST['correo'];
+    $email = $_POST['email'];
 
     // Conexión a la base de datos (reemplaza los valores con los de tu configuración)
     $servername = "localhost";

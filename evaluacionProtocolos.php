@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Encabezado
     $pdf->SetFont('Arial','B',14);
-    $pdf->Cell(0,10,'Resultados de la Evaluación',0,1,'C');
+    $pdf->Cell(0,10,'Resultados de la Evaluacion',0,1,'C');
     $pdf->Ln(10);
 
     // Información del formulario
@@ -76,19 +76,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html>
 <head>
     <title>Evaluación para Propuestas de Trabajo Terminal</title>
-    <link rel="stylesheet" type="text/css" href="styles.css">
-    <link rel="stylesheet" type="text/css" href="styles2.css">
+    <link rel="stylesheet" type="text/css" href="styles4.css">
 </head>
 <body>
     <div class="header">
         <h1>Evaluación para Propuestas de Trabajo Terminal</h1>
-        <div class="dropdown">
-            <button class="dropbtn">Menú</button>
-            <div class="dropdown-content">
-                <a href="perfil.php">Perfil</a>
-                <a href="login.php">Cerrar Sesión</a>
-            </div>
-        </div>
     </div>
 
     <div class="container">

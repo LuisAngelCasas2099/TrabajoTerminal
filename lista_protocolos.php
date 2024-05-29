@@ -36,8 +36,8 @@ $result = $conn->query($sql);
     <?php
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
-            $nombreArchivo = $row['nombre_archivo'];
-            $rutaArchivo = $row['ruta_archivo'];
+            $nombreArchivo = $row['titulo'];
+            //$rutaArchivo = $row['archivo'];
     ?>
             <div class="archivo" onclick="window.location.href='<?php echo $rutaArchivo; ?>'">
                 <p><?php echo $nombreArchivo; ?></p>

@@ -18,7 +18,7 @@ $id = $_SESSION['id']; // Obtener el valor de "id" de la sesión
 <html>
 <head>
     <title>Perfil</title>
-    <link rel="stylesheet" type="text/css" href="styles.css">
+    <link rel="stylesheet" type="text/css" href="styles4.css">
     <link rel="stylesheet" type="text/css" href="styles2.css">
 </head>
 <body>
@@ -35,6 +35,9 @@ $id = $_SESSION['id']; // Obtener el valor de "id" de la sesión
                 <?php endif; ?>
                 <?php if ($id == 2 || $id == 3) : ?>
                     <a href="alta_profesores.php">Alta de profesores</a>
+                <?php endif; ?>
+                <?php if ($id == 2 || $id == 3) : ?>
+                    <a href="lista_protocolos.php">Lista Protocolos</a>
                 <?php endif; ?>
                 <a href="perfil.php">Perfil</a>
                 <a href="registroProtocolo.php">Registro de Protocolo</a>
