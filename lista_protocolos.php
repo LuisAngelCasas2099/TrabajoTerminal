@@ -39,8 +39,9 @@ $result = $conn->query($sql);
             $nombreArchivo = $row['titulo'];
             //$rutaArchivo = $row['archivo'];
     ?>
-            <div class="archivo" onclick="window.location.href='<?php echo $rutaArchivo; ?>'">
+            <div class="archivo">
                 <p><?php echo $nombreArchivo; ?></p>
+                <a href="descomprimir_archivo.php?archivo=<?php echo $rutaArchivo; ?>"><button>Visualizar</button></a>
             </div>
     <?php
         }
@@ -50,8 +51,5 @@ $result = $conn->query($sql);
 
     $conn->close();
     ?>
-    <div class="footer">
-        <p>Desarrollado para la Escuela Superior de Computo</p>
-    </div>
 </body>
 </html>
