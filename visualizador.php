@@ -1,67 +1,128 @@
+<?php
+// Establecer la conexión a la base de datos
+$servername = "localhost";
+$username = "Admin";
+$password = "gamer4life";
+$dbname = "basededatos";
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Error de conexión a la base de datos: " . $conn->connect_error);
+}
+
+// Obtener el nombre del archivo PDF a mostrar
+$archivo = $_GET['archivo'];
+$rutaArchivo = "uploads/" . $archivo;
+
+// Opciones para los menús desplegables
+$opciones = array(
+    "Ciencias Sociales",
+    "Ciencias Básicas",
+    "Ingeniería de Software",
+    "Ciencias de la Computación",
+    "Sistemas Distribuidos",
+    "Sistemas Digitales",
+    "Fundamentos de Sistemas Electrónicos",
+    "Inteligencia Artificial",
+    "Ciencia de Datos",
+    "Proyectos Estratégicos y Toma de Decisiones"
+);
+
+// Guardar los valores de los menús desplegables en la base de datos
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $ac1 = $_POST['ac1'];
+    $ac2 = $_POST['ac2'];
+    $ac3 = $_POST['ac3'];
+
+    $sql = "UPDATE protocolos SET Ac1 = '$ac1', Ac2 = '$ac2', Ac3 = '$ac3' WHERE archivo = '$archivo'";
+    if ($conn->query($sql) === TRUE) {
+        echo "Los valores se asignaron correctamente.";
+    } else {
+        echo "Error al asignar los valores: " . $conn->error;
+    }
+}
+
+$conn->close();
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Visualizador de PDF</title>
+    <title>Asignar Protocolo</title>
+    <link rel="stylesheet" type="text/css" href="styles3.css">
     <style>
-        #pdf-viewer {
+        .pdf-container {
             width: 100%;
             height: 600px;
-            border: 1px solid #000;
-            overflow: auto;
+            margin-bottom: 20px;
         }
-        canvas {
+
+        .pdf-container embed {
+            width: 100%;
+            height: 100%;
+        }
+
+        .form-container {
+            width: 100%;
+            padding: 20px;
+        }
+
+        label {
             display: block;
-            margin: 10px auto;
+            margin-bottom: 10px;
+        }
+
+        select {
+            width: 100%;
+            padding: 5px;
+            margin-bottom: 20px;
+        }
+
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.13.207/pdf.min.js"></script>
 </head>
 <body>
-    <h1>Visualizador de PDF</h1>
-    <div id="pdf-viewer"></div>
+    <div class="header">
+        <h1>Asignar Protocolo</h1>
+    </div>
 
-    <script>
-        // Función para renderizar el PDF
-        function renderPDF(url) {
-            const loadingTask = pdfjsLib.getDocument(url);
-            loadingTask.promise.then(function(pdf) {
-                console.log('PDF cargado con éxito');
-                
-                const pdfViewer = document.getElementById('pdf-viewer');
-                pdfViewer.innerHTML = '';
+    <div class="pdf-container">
+        <embed src="<?php echo htmlspecialchars($rutaArchivo); ?>" type="application/pdf" />
+    </div>
 
-                // Renderizar cada página del PDF
-                for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
-                    pdf.getPage(pageNumber).then(function(page) {
-                        const scale = 1.5;
-                        const viewport = page.getViewport({ scale: scale });
+    <div class="form-container">
+        <form id="asignarForm" method="post">
+            <label for="ac1">Actividad 1:</label>
+            <select id="ac1" name="ac1">
+                <?php foreach ($opciones as $opcion) : ?>
+                    <option value="<?php echo htmlspecialchars($opcion); ?>"><?php echo htmlspecialchars($opcion); ?></option>
+                <?php endforeach; ?>
+            </select>
 
-                        // Preparar el lienzo para dibujar la página PDF
-                        const canvas = document.createElement('canvas');
-                        const context = canvas.getContext('2d');
-                        canvas.height = viewport.height;
-                        canvas.width = viewport.width;
+            <label for="ac2">Actividad 2:</label>
+            <select id="ac2" name="ac2">
+                <?php foreach ($opciones as $opcion) : ?>
+                    <option value="<?php echo htmlspecialchars($opcion); ?>"><?php echo htmlspecialchars($opcion); ?></option>
+                <?php endforeach; ?>
+            </select>
 
-                        // Dibujar la página en el lienzo
-                        const renderContext = {
-                            canvasContext: context,
-                            viewport: viewport
-                        };
-                        page.render(renderContext).promise.then(function() {
-                            console.log('Página ' + pageNumber + ' renderizada con éxito');
-                        });
+            <label for="ac3">Actividad 3:</label>
+            <select id="ac3" name="ac3">
+                <?php foreach ($opciones as $opcion) : ?>
+                    <option value="<?php echo htmlspecialchars($opcion); ?>"><?php echo htmlspecialchars($opcion); ?></option>
+                <?php endforeach; ?>
+            </select>
 
-                        // Añadir el lienzo al contenedor del visor
-                        pdfViewer.appendChild(canvas);
-                    });
-                }
-            }, function(reason) {
-                console.error('Error al cargar el PDF: ' + reason);
-            });
-        }
-
-        // Llamar a la función para renderizar el PDF (cambia 'uploads/nombre_archivo.pdf' por la ruta a tu archivo PDF)
-        renderPDF('C:\Users\luisa\OneDrive\Documentos\Ácidos_Carboxilicos');
-    </script>
+            <input type="submit" value="Guardar">
+        </form>
+    </div>
 </body>
 </html>

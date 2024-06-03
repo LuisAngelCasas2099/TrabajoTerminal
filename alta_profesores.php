@@ -41,28 +41,19 @@ $resultado = mysqli_query($conexion, $query);
                         <td><?php echo $fila['apellido']; ?></td>
                         <td><?php echo $fila['correo']; ?></td>
                         <td>
-                            <select name="menu1">
-                                <option value="">Nulo</option>
-                                <?php for ($i = 1; $i <= 11; $i++) { ?>
-                                    <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
-                                <?php } ?>
-                            </select>
+                        <select name="menu1"> <option value="">Nulo</option> <?php $options = array( "Ciencias sociales", "Ciencias básicas", "Ingeniería de software", "Ciencias de la computación", "Sistemas distribuidos", "Sistemas digitales", "Fundamentos de sistemas electrónicos", "Inteligencia artificial", "Ciencia de datos", "Proyectos estratégicos y toma de decisiones" ); for ($i = 0; $i < count($options); $i++) { ?> 
+                            <option value="<?php echo $i+1; ?>"><?php echo $i+1 . ". " . $options[$i]; ?></option> <?php } ?> 
+                        </select>
                         </td>
                         <td>
-                            <select name="menu2">
-                                <option value="">Nulo</option>
-                                <?php for ($i = 1; $i <= 11; $i++) { ?>
-                                    <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
-                                <?php } ?>
-                            </select>
+                        <select name="menu2"> <option value="">Nulo</option> <?php $options = array( "Ciencias sociales", "Ciencias básicas", "Ingeniería de software", "Ciencias de la computación", "Sistemas distribuidos", "Sistemas digitales", "Fundamentos de sistemas electrónicos", "Inteligencia artificial", "Ciencia de datos", "Proyectos estratégicos y toma de decisiones" ); for ($i = 0; $i < count($options); $i++) { ?> 
+                            <option value="<?php echo $i+1; ?>"><?php echo $i+1 . ". " . $options[$i]; ?></option> <?php } ?> 
+                        </select>
                         </td>
                         <td>
-                            <select name="menu3">
-                                <option value="">Nulo</option>
-                                <?php for ($i = 1; $i <= 11; $i++) { ?>
-                                    <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
-                                <?php } ?>
-                            </select>
+                        <select name="menu3"> <option value="">Nulo</option> <?php $options = array( "Ciencias sociales", "Ciencias básicas", "Ingeniería de software", "Ciencias de la computación", "Sistemas distribuidos", "Sistemas digitales", "Fundamentos de sistemas electrónicos", "Inteligencia artificial", "Ciencia de datos", "Proyectos estratégicos y toma de decisiones" ); for ($i = 0; $i < count($options); $i++) { ?> 
+                            <option value="<?php echo $i+1; ?>"><?php echo $i+1 . ". " . $options[$i]; ?></option> <?php } ?> 
+                        </select>
                         </td>
                         <td>
                             <button class="guardar" value="<?php echo $fila['id']; ?>">Guardar</button>

@@ -30,8 +30,11 @@ $id = $_SESSION['id']; // Obtener el valor de "id" de la sesión
         <div class="dropdown">
             <button class="dropbtn">Menú</button>
             <div class="dropdown-content">
-                <?php if ($id == 0) : ?>
+                <?php if ($id == 2) : ?>
                     <a href="lista_asignacion.php">Lista Protocolos</a>
+                <?php endif; ?>
+                <?php if ($id == 0) : ?>
+                    <a href="lista_academia.php">Lista Protocolos</a>
                 <?php endif; ?>
                 <?php if ($id == 2 || $id == 3) : ?>
                     <a href="alta_profesores.php">Alta de profesores</a>
