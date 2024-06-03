@@ -1,89 +1,90 @@
 <?php
-require 'vendor/autoload.php';
-require 'fpdf/fpdf.php';
+    include_once 'conexion.php';
 
-// Datos de conexión a la base de datos
-$servername = "localhost";
-$username = "Admin";
-$password = "gamer4life";
-$dbname = "basededatos";
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $num_estudiantes = $_POST['num_estudiantes'];
+        $num_directores = $_POST['num_directores'];
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $titulo = $_POST['titulo'];
-    $palabras_clave = $_POST['palabras_clave'];
-    $resumen = $_POST['resumen'];
-    $correos = [
-        $_POST['correo_director_principal'] ?? null,
-        $_POST['correo_director_secundario'] ?? null
-    ];
-
-    // Agregar correos de los estudiantes
-    for ($i = 0; $i < 4; $i++) {
-        if (isset($_POST["correo$i"])) {
-            $correos[] = $_POST["correo$i"];
+        $estudiantes = [];
+        for ($i = 0; $i < $num_estudiantes; $i++) {
+            $estudiantes[] = [
+                'nombre' => $_POST["nombre_$i"],
+                'apellido' => $_POST["apellido$i"],
+                'correo' => $_POST["correo$i"]
+            ];
         }
-    }
 
-    $target_dir = "uploads/";
-    if (!is_dir($target_dir)) {
-        mkdir($target_dir, 0777, true); // Crear el directorio si no existe
-    }
+        $directores = [];
+        for ($i = 0; $i < $num_directores; $i++) {
+            $directores[] = [
+                'nombre' => $_POST["director_nombre_$i"],
+                'apellido' => $_POST["director_apellido_$i"]
+            ];
+        }
 
-    $target_file = $target_dir . basename($_FILES["documento_pdf"]["name"]);
-    $uploadOk = 1;
-    $pdfFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
+        $titulo = $_POST['titulo'];
+        $descripcion = $_POST['descripcion'];
+        $resumen = $_POST['resumen'];
+        $palabras_clave = $_POST['palabras_clave'];
 
-    if ($pdfFileType != "pdf") {
-        echo "Solo se permiten archivos PDF.";
-        $uploadOk = 0;
-    }
+        $target_dir = "uploads/";
+        $target_file = $target_dir . basename($_FILES["documento_pdf"]["name"]);
+        $uploadOk = 1;
+        $pdfFileType = strtolower(pathinfo($target_file, PATHINFO_EXTENSION));
 
-    if ($uploadOk == 1) {
-        if (move_uploaded_file($_FILES["documento_pdf"]["tmp_name"], $target_file)) {
-            echo "El archivo " . basename($_FILES["documento_pdf"]["name"]) . " ha sido subido.";
-        } else {
-            echo "Hubo un error al subir el archivo.";
+        if ($pdfFileType != "pdf") {
+            echo "Solo se permiten archivos PDF.";
             $uploadOk = 0;
         }
-    }
 
-    if ($uploadOk == 1) {
-        try {
-            $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
-            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-            // Leer el archivo PDF
-            $pdfData = file_get_contents($target_file);
-
-            // Insertar el registro en la tabla protocolos
-            $stmt = $conn->prepare("INSERT INTO protocolos (titulo, palabrasclave, resumen, archivo) VALUES (:titulo, :palabras_clave, :resumen, :archivo)");
-            $stmt->bindParam(':titulo', $titulo);
-            $stmt->bindParam(':palabras_clave', $palabras_clave);
-            $stmt->bindParam(':resumen', $resumen);
-            $stmt->bindParam(':archivo', $pdfData, PDO::PARAM_LOB);
-            $stmt->execute();
-
-            // Obtener el último idP insertado
-            $idP = $conn->lastInsertId();
-
-            // Actualizar la tabla usuarios con el nuevo idP para los correos ingresados
-            foreach ($correos as $correo) {
-                if ($correo) {
-                    $stmt = $conn->prepare("UPDATE usuarios SET idP = :idP WHERE correo = :correo");
-                    $stmt->bindParam(':idP', $idP, PDO::PARAM_INT);
-                    $stmt->bindParam(':correo', $correo, PDO::PARAM_STR);
-                    $stmt->execute();
-                }
+        if ($uploadOk == 1) {
+            if (move_uploaded_file($_FILES["documento_pdf"]["tmp_name"], $target_file)) {
+                echo "El archivo " . basename($_FILES["documento_pdf"]["name"]) . " ha sido subido.";
+            } else {
+                echo "Hubo un error al subir el archivo.";
             }
-
-            echo "Se ha asignado correctamente el idP a las filas de usuarios.";
-
-            // Redirigir a la página perfil.php
-            header("Location: perfil.php");
-            exit();
-        } catch (PDOException $e) {
-            echo "Error de conexión: " . $e->getMessage();
         }
+
+        $sql = "INSERT INTO protocolos (titulo, descripcion, resumen, palabras_clave, archivo_pdf) VALUES (?, ?, ?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("sssss", $titulo, $descripcion, $resumen, $palabras_clave, $target_file);
+        $stmt->execute();
+
+        $protocolo_id = $stmt->insert_id;
+
+        foreach ($estudiantes as $index => $estudiante) {
+            $sql = "INSERT INTO estudiantes (nombre, apellido, correo, protocolo_id) VALUES (?, ?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("sssi", $estudiante['nombre'], $estudiante['apellido'], $estudiante['correo'], $protocolo_id);
+            $stmt->execute();
+        }
+
+        foreach ($directores as $index => $director) {
+            $sql = "INSERT INTO directores (nombre, apellido, protocolo_id) VALUES (?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("ssi", $director['nombre'], $director['apellido'], $protocolo_id);
+            $stmt->execute();
+        }
+
+        echo "<h2>Los datos recibidos son:</h2>";
+
+        foreach ($estudiantes as $index => $estudiante) {
+            echo "<h3>Estudiante " . ($index + 1) . "</h3>";
+            echo "<p>Nombre: " . $estudiante['nombre'] . "</p>";
+            echo "<p>Apellido: " . $estudiante['apellido'] . "</p>";
+            echo "<p>Correo: " . $estudiante['correo'] . "</p>";
+        }
+
+        foreach ($directores as $index => $director) {
+            echo "<h3>Director " . ($index + 1) . "</h3>";
+            echo "<p>Nombre: " . $director['nombre'] . "</p>";
+            echo "<p>Apellido: " . $director['apellido'] . "</p>";
+        }
+
+        echo "<p>Título del Protocolo: $titulo</p>";
+        echo "<p>Descripción Breve: $descripcion</p>";
+        echo "<p>Resumen: $resumen</p>";
+        echo "<p>Palabras Clave: $palabras_clave</p>";
+        echo "<p>Archivo PDF: <a href='$target_file'>Descargar</a></p>";
     }
-}
 ?>

@@ -27,6 +27,7 @@ if ($result->num_rows > 0) {
     $_SESSION['correo'] = $row['correo'];
     $_SESSION['telefono'] = $row['telefono'];
     $_SESSION['boleta'] = $row['boleta'];
+    $_SESSION['id'] = $row['id'];
     $response = array('success' => true);
 } else {
     $response = array('error' => 'Credenciales incorrectas. Por favor, inténtalo de nuevo.');

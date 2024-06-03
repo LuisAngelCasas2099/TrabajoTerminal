@@ -1,5 +1,25 @@
 <?php
+session_start();
+
+if (!isset($_SESSION['nombre'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$id = $_SESSION['id'];
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Establecer la conexión a la base de datos
+    $servername = "localhost";
+    $username = "Admin";
+    $password = "gamer4life";
+    $dbname = "basededatos";
+
+    $conn = new mysqli($servername, $username, $password, $dbname);
+    if ($conn->connect_error) {
+        die("La conexión a la base de datos falló: " . $conn->connect_error);
+    }
+
     $num_estudiantes = $_POST['num_estudiantes'];
     $num_directores = $_POST['num_directores'];
 
@@ -7,9 +27,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     for ($i = 0; $i < $num_estudiantes; $i++) {
         $estudiantes[] = [
             'nombre' => $_POST["nombre_$i"],
-            'apellido_paterno' => $_POST["apellido_paterno_$i"],
-            'apellido_materno' => $_POST["apellido_materno_$i"],
-            'numero_boleta' => $_POST["numero_boleta_$i"]
+            'apellido' => $_POST["apellido$i"],
+            'correo' => $_POST["correo$i"]
         ];
     }
 
@@ -24,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $titulo = $_POST['titulo'];
     $descripcion = $_POST['descripcion'];
     $resumen = $_POST['resumen'];
-    $palabras_clave = $_POST['palabras_clave'];
+    $palabrasclave = $_POST['palabrasclave'];
 
     $target_dir = "uploads/";
     $target_file = $target_dir . basename($_FILES["documento_pdf"]["name"]);
@@ -36,35 +55,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $uploadOk = 0;
     }
 
+    // Obtener el idP del protocolo registrado
+    $idP = null;
+    if ($uploadOk == 1) {
+        // Insertar el protocolo en la base de datos
+        $stmt = $conn->prepare("INSERT INTO protocolos (titulo, palabrasclave, resumen, archivo, nombre_archivo) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssss", $titulo, $palabrasclave, $resumen, $target_file, $_FILES["documento_pdf"]["name"]);
+        
+        if ($stmt->execute()) {
+            $idP = $stmt->insert_id;
+        } else {
+            echo "Hubo un error al insertar el protocolo en la base de datos.";
+        }
+        $stmt->close();
+    }
+
+    // Asignar el idP a los estudiantes
+    if ($idP != null) {
+        foreach ($estudiantes as $index => $estudiante) {
+            $correo = $estudiante['correo'];
+            $stmt = $conn->prepare("UPDATE usuarios SET idP = ? WHERE correo = ?");
+            $stmt->bind_param("is", $idP, $correo);
+            if (!$stmt->execute()) {
+                echo "Hubo un error al asignar el idP al estudiante con correo $correo.";
+            }
+            $stmt->close();
+        }
+    }
+    
+
     if ($uploadOk == 1) {
         if (move_uploaded_file($_FILES["documento_pdf"]["tmp_name"], $target_file)) {
-            echo "El archivo " . basename($_FILES["documento_pdf"]["name"]) . " ha sido subido.";
+            // echo "El archivo " . basename($_FILES["documento_pdf"]["name"]) . " ha sido subido.";
+            header("Location: perfil.php");
+            exit();
         } else {
             echo "Hubo un error al subir el archivo.";
         }
     }
 
-    echo "<h2>Los datos recibidos son:</h2>";
-
-    foreach ($estudiantes as $index => $estudiante) {
-        echo "<h3>Estudiante " . ($index + 1) . "</h3>";
-        echo "<p>Nombre: " . $estudiante['nombre'] . "</p>";
-        echo "<p>Apellido Paterno: " . $estudiante['apellido_paterno'] . "</p>";
-        echo "<p>Apellido Materno: " . $estudiante['apellido_materno'] . "</p>";
-        echo "<p>Número de Boleta: " . $estudiante['numero_boleta'] . "</p>";
-    }
-
-    foreach ($directores as $index => $director) {
-        echo "<h3>Director " . ($index + 1) . "</h3>";
-        echo "<p>Nombre: " . $director['nombre'] . "</p>";
-        echo "<p>Apellido: " . $director['apellido'] . "</p>";
-    }
-
-    echo "<p>Título del Protocolo: $titulo</p>";
-    echo "<p>Descripción Breve: $descripcion</p>";
-    echo "<p>Resumen: $resumen</p>";
-    echo "<p>Palabras Clave: $palabras_clave</p>";
-    echo "<p>Archivo PDF: <a href='$target_file'>Descargar</a></p>";
+    // Cerrar la conexión a la base de datos
+    $conn->close();
 }
 ?>
 
@@ -74,6 +105,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <title>Registrar Protocolo de Titulación</title>
     <link rel="stylesheet" type="text/css" href="styles3.css">
+    <link rel="stylesheet" type="text/css" href="styles2.css">
     <script>
         function generarCampos() {
             var numEstudiantes = document.getElementById("num_estudiantes").value;
@@ -91,14 +123,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <label for="nombre_${i}">Nombre:</label>
                 <input type="text" id="nombre_${i}" name="nombre_${i}" required><br><br>
 
-                <label for="apellido_paterno_${i}">Apellido Paterno:</label>
-                <input type="text" id="apellido_paterno_${i}" name="apellido_paterno_${i}" required><br><br>
+                <label for="apellido${i}">Apellidos:</label>
+                <input type="text" id="apellido${i}" name="apellido${i}" required><br><br>
 
-                <label for="apellido_materno_${i}">Apellido Materno:</label>
-                <input type="text" id="apellido_materno_${i}" name="apellido_materno_${i}" required><br><br>
-
-                <label for="numero_boleta_${i}">Número de Boleta:</label>
-                <input type="text" id="numero_boleta_${i}" name="numero_boleta_${i}" required><br><br>`;
+                <label for="correo${i}">Correo:</label>
+                <input type="text" id="correo${i}" name="correo${i}" required><br><br>`;
             }
 
             var numDirectores = document.getElementById("num_directores").value;
@@ -135,6 +164,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
     <div class="header">
         <h1>Registro de Protocolo de Titulación</h1>
+        <div class="dropdown">
+            <button class="dropbtn">Menú</button>
+            <div class="dropdown-content">
+                <?php if ($id == 0) : ?>
+                    <a href="lista_protocolos.php">Lista Protocolos</a>
+                <?php endif; ?>
+                <?php if ($id == 2 || $id == 3) : ?>
+                    <a href="alta_profesores.php">Alta de profesores</a>
+                <?php endif; ?>
+                <?php if ($id == 2 || $id == 3) : ?>
+                    <a href="lista_protocolos.php">Lista Protocolos</a>
+                <?php endif; ?>
+                <a href="perfil.php">Perfil</a>
+                <?php if ($id == 1) : ?>
+                <a href="registroProtocolo.php">Registro de Protocolo</a>
+                <?php endif; ?>
+                <a href="visualizador.php">Visualizador</a>
+                <?php if ($id == 2 || $id == 3) : ?>
+                <a href="evaluacionProtocolos.php">Evaluacion Protocolos </a>
+                <?php endif; ?>
+                <a href="login.php">Cerrar Sesión</a>
+            </div>
+        </div>
     </div>
 
     <div class="main-container">
@@ -166,8 +218,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <label for="resumen">Resumen:</label><br>
                 <textarea id="resumen" name="resumen" rows="4" cols="50" required></textarea><br><br>
 
-                <label for="palabras_clave">Palabras Clave:</label>
-                <input type="text" id="palabras_clave" name="palabras_clave" required><br><br>
+                <label for="palabrasclave">Palabras Clave:</label>
+                <input type="text" id="palabrasclave" name="palabrasclave" required><br><br>
 
                 <label for="documento_pdf">Subir Documento PDF:</label>
                 <input type="file" id="documento_pdf" name="documento_pdf" accept=".pdf" onchange="mostrarPDF(this)" required><br><br>

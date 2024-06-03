@@ -31,19 +31,23 @@ $id = $_SESSION['id']; // Obtener el valor de "id" de la sesión
             <button class="dropbtn">Menú</button>
             <div class="dropdown-content">
                 <?php if ($id == 0) : ?>
-                    <a href="lista_protocolos.php">Lista Protocolos</a>
+                    <a href="lista_asignacion.php">Lista Protocolos</a>
                 <?php endif; ?>
                 <?php if ($id == 2 || $id == 3) : ?>
                     <a href="alta_profesores.php">Alta de profesores</a>
                 <?php endif; ?>
                 <?php if ($id == 2 || $id == 3) : ?>
-                    <a href="lista_protocolos.php">Lista Protocolos</a>
+                    <a href="lista_protocolos.php">Lista para asignación</a>
                 <?php endif; ?>
                 <a href="perfil.php">Perfil</a>
+                <?php if ($id == 1) : ?>
                 <a href="registroProtocolo.php">Registro de Protocolo</a>
-                <a href="login.php">Cerrar Sesión</a>
+                <?php endif; ?>
                 <a href="visualizador.php">Visualizador</a>
+                <?php if ($id == 2 || $id == 3) : ?>
                 <a href="evaluacionProtocolos.php">Evaluacion Protocolos </a>
+                <?php endif; ?>
+                <a href="login.php">Cerrar Sesión</a>
             </div>
         </div>
     </div>
