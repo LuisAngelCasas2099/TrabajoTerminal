@@ -55,13 +55,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $uploadOk = 0;
     }
 
+    if ($_FILES["documento_pdf"]["size"] > 5000000) {
+        echo "El archivo es demasiado grande. Solo se permiten archivos de hasta 5MB.";
+        $uploadOk = 0;
+    }
+
     // Obtener el idP del protocolo registrado
     $idP = null;
     if ($uploadOk == 1) {
         // Insertar el protocolo en la base de datos
         $stmt = $conn->prepare("INSERT INTO protocolos (titulo, palabrasclave, resumen, archivo, nombre_archivo) VALUES (?, ?, ?, ?, ?)");
         $stmt->bind_param("sssss", $titulo, $palabrasclave, $resumen, $target_file, $_FILES["documento_pdf"]["name"]);
-        
+
         if ($stmt->execute()) {
             $idP = $stmt->insert_id;
         } else {
@@ -82,11 +87,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->close();
         }
     }
-    
 
     if ($uploadOk == 1) {
         if (move_uploaded_file($_FILES["documento_pdf"]["tmp_name"], $target_file)) {
-            // echo "El archivo " . basename($_FILES["documento_pdf"]["name"]) . " ha sido subido.";
             header("Location: perfil.php");
             exit();
         } else {
@@ -99,9 +102,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
-
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Registrar Protocolo de Titulación</title>
     <link rel="stylesheet" type="text/css" href="styles3.css">
@@ -153,7 +156,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         function mostrarPDF(input) {
             var file = input.files[0];
             var reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 var preview = document.getElementById("pdf_preview");
                 preview.src = e.target.result;
             };
@@ -161,28 +164,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     </script>
 </head>
+
 <body>
     <div class="header">
         <h1>Registro de Protocolo de Titulación</h1>
         <div class="dropdown">
             <button class="dropbtn">Menú</button>
             <div class="dropdown-content">
-                <?php if ($id == 0) : ?>
+                <?php if ($id == 0): ?>
                     <a href="lista_protocolos.php">Lista Protocolos</a>
                 <?php endif; ?>
-                <?php if ($id == 2 || $id == 3) : ?>
+                <?php if ($id == 2 || $id == 3): ?>
                     <a href="alta_profesores.php">Alta de profesores</a>
                 <?php endif; ?>
-                <?php if ($id == 2 || $id == 3) : ?>
+                <?php if ($id == 2 || $id == 3): ?>
                     <a href="lista_protocolos.php">Lista Protocolos</a>
                 <?php endif; ?>
                 <a href="perfil.php">Perfil</a>
-                <?php if ($id == 1) : ?>
-                <a href="registroProtocolo.php">Registro de Protocolo</a>
+                <?php if ($id == 1): ?>
+                    <a href="registroProtocolo.php">Registro de Protocolo</a>
                 <?php endif; ?>
-                <a href="visualizador.php">Visualizador</a>
-                <?php if ($id == 2 || $id == 3) : ?>
-                <a href="evaluacionProtocolos.php">Evaluacion Protocolos </a>
+                <?php if ($id == 2 || $id == 3): ?>
+                    <a href="evaluacionProtocolos.php">Evaluacion Protocolos </a>
                 <?php endif; ?>
                 <a href="login.php">Cerrar Sesión</a>
             </div>
@@ -198,14 +201,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <h2>Por favor, complete el formulario:</h2>
             <form id="registroForm" method="post" enctype="multipart/form-data">
                 <label for="num_estudiantes">Número de Estudiantes:</label>
-                <input type="number" id="num_estudiantes" name="num_estudiantes" min="1" max="4" required oninput="generarCampos()"><br><br>
+                <input type="number" id="num_estudiantes" name="num_estudiantes" min="1" max="4" required
+                    oninput="generarCampos()"><br><br>
 
                 <div id="estudiantes"></div>
 
                 <h3>Datos del Protocolo</h3> <!-- Nuevo subtítulo -->
-                
+
                 <label for="num_directores">Número de Directores:</label>
-                <input type="number" id="num_directores" name="num_directores" min="1" max="2" required oninput="generarCampos()"><br><br>
+                <input type="number" id="num_directores" name="num_directores" min="1" max="2" required
+                    oninput="generarCampos()"><br><br>
 
                 <div id="directores"></div>
 
@@ -222,11 +227,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <input type="text" id="palabrasclave" name="palabrasclave" required><br><br>
 
                 <label for="documento_pdf">Subir Documento PDF:</label>
-                <input type="file" id="documento_pdf" name="documento_pdf" accept=".pdf" onchange="mostrarPDF(this)" required><br><br>
+                <input type="file" id="documento_pdf" name="documento_pdf" accept=".pdf" onchange="mostrarPDF(this)"
+                    required><br><br>
 
                 <input type="submit" value="Registrar Protocolo">
             </form>
         </div>
     </div>
 </body>
+
 </html>

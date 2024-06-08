@@ -218,3 +218,12 @@ a {
     padding: 10px;
     border-radius: 6px;
 }
+
+.a {
+    background-color: #1877f2;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    cursor: pointer;
+}

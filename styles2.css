@@ -95,4 +95,14 @@ body {
         .cancelar-btn:hover {
             background-color: #c82333; /* Color rojo más oscuro al pasar el cursor */
         }
-        
+        table {
+            margin: 0 auto;
+        }
+        .regresar {
+            background-color: #1877f2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 20px;
+            cursor: pointer;
+        }

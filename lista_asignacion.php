@@ -1,4 +1,7 @@
 <?php
+// Definir el id del usuario actual
+$id = 3; // Cambiar por el id del usuario actual
+
 // Establecer la conexión a la base de datos
 $servername = "localhost";
 $username = "Admin";
@@ -12,8 +15,9 @@ if ($conn->connect_error) {
 }
 
 // Consulta para obtener los protocolos
-$sql = "SELECT * FROM protocolos WHERE Ac1 = 0 AND Ac2 = 0 AND Ac3 = 0";
-$result = $conn->query($sql);
+$stmt = $conn->prepare("SELECT * FROM protocolos WHERE Ac1 = 0 AND Ac2 = 0 AND Ac3 = 0");
+$stmt->execute();
+$result = $stmt->get_result();
 
 $protocolos = array();
 if ($result->num_rows > 0) {
@@ -22,23 +26,24 @@ if ($result->num_rows > 0) {
     }
 }
 
-
-
 $conn->close();
 ?>
 
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Lista de Protocolos</title>
     <link rel="stylesheet" type="text/css" href="styles3.css">
+    <link rel="stylesheet" type="text/css" href="styles2.css">
     <style>
         table {
             border-collapse: collapse;
             width: 100%;
         }
 
-        th, td {
+        th,
+        td {
             text-align: left;
             padding: 8px;
         }
@@ -64,26 +69,56 @@ $conn->close();
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h1>Lista de Protocolos</h1>
+        <div class="dropdown">
+            <button class="dropbtn">Menú</button>
+            <div class="dropdown-content">
+                <?php if ($id == 0): ?>
+                    <a href="lista_academia.php">Lista Protocolos</a>
+                <?php endif; ?>
+                <?php if ($id == 3 || $id == 4): ?>
+                    <a href="alta_profesores.php">Alta de profesores</a>
+                <?php endif; ?>
+                <a href="perfil.php">Perfil</a>
+                <?php if ($id == 1): ?>
+                    <a href="registroProtocolo.php">Registro de Protocolo</a>
+                <?php endif; ?>
+                <?php if ($id == 0): ?>
+                    <a href="evaluacionProtocolos.php">Evaluacion Protocolos </a>
+                <?php endif; ?>
+                <a href="login.php">Cerrar Sesión</a>
+            </div>
+        </div>
     </div>
 
     <table>
         <tr>
             <th>Título</th>
             <th>Archivo</th>
+            <th>Palabras clave</th>
             <th>Acciones</th>
+            
         </tr>
-        <?php foreach ($protocolos as $protocolo) : ?>
+        <?php if (!empty($protocolos)) : ?>
+            <?php foreach ($protocolos as $protocolo): ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($protocolo['titulo']); ?></td>
+                    <td><?php echo htmlspecialchars($protocolo['nombre_archivo']); ?></td>
+                    <td><?php echo htmlspecialchars($protocolo['palabrasclave']); ?></td>
+                    <td>
+                        <a href="asignar_protocolo.php?archivo=<?php echo htmlspecialchars($protocolo['nombre_archivo']); ?>">Asignar Protocolo</a>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php else: ?>
             <tr>
-                <td><?php echo $protocolo['titulo']; ?></td>
-                <td><?php echo $protocolo['nombre_archivo']; ?></td>
-                <td>
-                    <a href="asignar_protocolo.php?archivo=<?php echo $protocolo['nombre_archivo']; ?>">Asignar Protocolo</a>
-                </td>
+                <td colspan="3">No hay protocolos disponibles para asignar</td>
             </tr>
-        <?php endforeach; ?>
+        <?php endif; ?>
     </table>
 </body>
+
 </html>

@@ -18,12 +18,15 @@ $ac2 = $_POST['ac2'];
 $ac3 = $_POST['ac3'];
 
 // Actualizar las columnas "Ac1", "Ac2" y "Ac3" en la fila correspondiente del archivo seleccionado en la base de datos
-$sql = "UPDATE protocolos SET Ac1 = $ac1, Ac2 = $ac2, Ac3 = $ac3 WHERE nombre_archivo = '$archivo'";
-if ($conn->query($sql) === TRUE) {
+$stmt = $conn->prepare("UPDATE protocolos SET Ac1 = ?, Ac2 = ?, Ac3 = ? WHERE nombre_archivo = ?");
+$stmt->bind_param("iiis", $ac1, $ac2, $ac3, $archivo);
+
+if ($stmt->execute()) {
     echo "Los datos se actualizaron correctamente.";
 } else {
     echo "Error al actualizar los datos: " . $conn->error;
 }
 
+$stmt->close();
 $conn->close();
 ?>

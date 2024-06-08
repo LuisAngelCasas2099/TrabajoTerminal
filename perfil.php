@@ -16,39 +16,39 @@ $id = $_SESSION['id']; // Obtener el valor de "id" de la sesión
 
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Perfil</title>
     <link rel="stylesheet" type="text/css" href="styles4.css">
     <link rel="stylesheet" type="text/css" href="styles2.css">
 </head>
+
 <body>
     <div class="header">
         <div class="mensaje-bienvenida">
-            <h2>Bienvenido, <?php echo $nombre; ?></h2>
+            <h2>Bienvenido, <?php if ($id == 0) {
+                echo "docente";
+            } elseif ($id == 1) {
+                echo "alumno";
+            } ?>
+                <?php echo $nombre; ?></h2>
         </div>
         <h1 class="titulo">Perfil</h1>
         <div class="dropdown">
             <button class="dropbtn">Menú</button>
             <div class="dropdown-content">
-                <?php if ($id == 2) : ?>
+                <?php if ($id == 3 || $id == 4): ?>
                     <a href="lista_asignacion.php">Lista Protocolos</a>
                 <?php endif; ?>
-                <?php if ($id == 0) : ?>
+                <?php if ($id == 0): ?>
                     <a href="lista_academia.php">Lista Protocolos</a>
                 <?php endif; ?>
-                <?php if ($id == 2 || $id == 3) : ?>
+                <?php if ($id == 3 || $id == 4): ?>
                     <a href="alta_profesores.php">Alta de profesores</a>
                 <?php endif; ?>
-                <?php if ($id == 2 || $id == 3) : ?>
-                    <a href="lista_protocolos.php">Lista para asignación</a>
-                <?php endif; ?>
                 <a href="perfil.php">Perfil</a>
-                <?php if ($id == 1) : ?>
-                <a href="registroProtocolo.php">Registro de Protocolo</a>
-                <?php endif; ?>
-                <a href="visualizador.php">Visualizador</a>
-                <?php if ($id == 2 || $id == 3) : ?>
-                <a href="evaluacionProtocolos.php">Evaluacion Protocolos </a>
+                <?php if ($id == 1): ?>
+                    <a href="registroProtocolo.php">Registro de Protocolo</a>
                 <?php endif; ?>
                 <a href="login.php">Cerrar Sesión</a>
             </div>
@@ -60,7 +60,8 @@ $id = $_SESSION['id']; // Obtener el valor de "id" de la sesión
             <div class="datos-box">
                 <p><strong>Correo:</strong> <?php echo $correo; ?></p>
                 <p><strong>Teléfono:</strong> <span id="telefono"><?php echo $telefono; ?></span></p>
-                <p><?php if ($id == 0) : ?><strong>Boleta:</strong> <span id="boleta"><?php echo $boleta; ?></span><?php endif; ?></p>
+                <p><?php if ($id == 0): ?><strong>Boleta:</strong> <span
+                            id="boleta"><?php echo $boleta; ?></span><?php endif; ?></p>
                 <button class="modificar-btn" onclick="habilitarEdicion()">Modificar Datos</button>
                 <div id="contenedor-modificar" class="campo-modificar">
                     <label for="nuevo-nombre">Nuevo Nombre:</label>
@@ -73,7 +74,7 @@ $id = $_SESSION['id']; // Obtener el valor de "id" de la sesión
             </div>
         </div>
     </div>
-    
+
     <div id="modal" class="modal">
         <div class="modal-content">
             <label for="password">Ingresa tu contraseña:</label>
@@ -82,14 +83,92 @@ $id = $_SESSION['id']; // Obtener el valor de "id" de la sesión
             <button class="cancelar-btn" onclick="cerrarModal()">Regresar</button>
         </div>
     </div>
-    
-            <div class="protocolo">
-                <h3>Protocolo</h3>
-                <button class="modificar-btn">Visualizar Información</button>
-                <p>Aquí va el contenido del protocolo...</p>
-            </div>
+
+    <?php if ($id == 1) { ?>
+        <div class="protocolo">
+            <h3>Protocolo</h3>
+            <button class="modificar-btn">Visualizar Información</button>
         </div>
+    <?php } ?>
     </div>
+    </div>
+
+    <!-- Descargar protocolos -->
+    <?php
+    if (isset($_POST['descargar'])) {
+        $dir = "uploads/";
+        $files = scandir($dir);
+        foreach ($files as $file) {
+            if ($file != "." && $file != "..") {
+                $path = $dir . $file;
+                if (is_file($path)) {
+                    header('Content-Type: application/octet-stream');
+                    header('Content-Disposition: attachment; filename=' . basename($path));
+                    header('Content-Length: ' . filesize($path));
+                    readfile($path);
+                }
+            }
+        }
+    }
+    ?>
+
+    <?php
+    if ($id == 3 || $id == 4) {
+        ?>
+        <form method="post">
+            <input type="submit" name="descargar" value="Descargar protocolos">
+        </form>
+        <?php
+    }
+    ?>
+
+    <!-- Eliminar protocolos -->
+    <?php
+    if (isset($_POST['eliminar'])) {
+        $servername = "localhost";
+        $username = "Admin";
+        $password = "gamer4life";
+        $dbname = "basededatos";
+
+        $conn = new mysqli($servername, $username, $password, $dbname);
+        if ($conn->connect_error) {
+            die("La conexión a la base de datos falló: " . $conn->connect_error);
+        }
+
+        // Eliminar los archivos de la carpeta "uploads"
+        $dir = "uploads/";
+        $files = scandir($dir);
+        foreach ($files as $file) {
+            if ($file != "." && $file != "..") {
+                $path = $dir . $file;
+                if (is_file($path)) {
+                    unlink($path);
+                }
+            }
+        }
+
+        // Vaciar la tabla "protocolos"
+        $sql = "TRUNCATE TABLE protocolos";
+        if ($conn->query($sql) === TRUE) {
+            echo "La tabla protocolos ha sido vaciada.";
+        } else {
+            echo "Error al vaciar la tabla protocolos: " . $conn->error;
+        }
+
+        $conn->close();
+    }
+    ?>
+
+    <?php
+    if ($id == 3 || $id == 4) {
+        ?>
+        <form method="post">
+            <input type="submit" name="eliminar" value="Eliminar protocolos">
+        </form>
+        <?php
+    }
+    ?>
+
 
     <div id="modal" class="modal">
         <div class="modal-content">
@@ -103,29 +182,29 @@ $id = $_SESSION['id']; // Obtener el valor de "id" de la sesión
         function habilitarEdicion() {
             document.getElementById('contenedor-modificar').style.display = 'block';
         }
-    
+
         function mostrarModalConfirmacion() {
             document.getElementById('modal').style.display = 'block';
         }
-    
+
         function cancelarModificacion() {
             document.getElementById('contenedor-modificar').style.display = 'none';
         }
-    
+
         function confirmarCambios() {
             var contrasena = document.getElementById('password').value;
             var nuevoNombre = document.getElementById('nuevo-nombre').value;
             var nuevoTelefono = document.getElementById('nuevo-telefono').value;
-        
+
             // Realizar la consulta SQL para comparar la contraseña con el correo asociado
             // y actualizar los datos si la contraseña es correcta
             // Aquí debes reemplazar 'tu_tabla' con el nombre de tu tabla en la base de datos
             // y 'tu_correo' con el correo asociado al usuario que inició sesión
             var sql = "SELECT * FROM usuarios WHERE correo = correo AND contrasena = '" + contrasena + "'";
-            
+
             // Ejecutar la consulta SQL
             // Aquí debes ejecutar la consulta y procesar el resultado para verificar la contraseña
-        
+
             // Si la contraseña es correcta, actualizar los datos en la base de datos
             if (contraseñaCorrecta) {
                 var sqlUpdate = "UPDATE usuarios SET ";
@@ -139,10 +218,10 @@ $id = $_SESSION['id']; // Obtener el valor de "id" de la sesión
                     sqlUpdate += "telefono = '" + nuevoTelefono + "'";
                 }
                 sqlUpdate += " WHERE correo = 'correo'";
-                
+
                 // Ejecutar la consulta de actualización
                 // Aquí debes ejecutar la consulta de actualización en la base de datos
-        
+
                 // Mostrar mensaje de éxito
                 alert("Datos actualizados correctamente");
             } else {
@@ -150,12 +229,13 @@ $id = $_SESSION['id']; // Obtener el valor de "id" de la sesión
                 document.getElementById('mensaje-error').innerText = "Contraseña incorrecta";
             }
         }
-        
-    
+
+
         function cerrarModal() {
             document.getElementById('modal').style.display = 'none';
         }
     </script>
-    
+
 </body>
+
 </html>

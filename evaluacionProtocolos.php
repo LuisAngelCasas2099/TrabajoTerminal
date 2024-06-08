@@ -1,6 +1,7 @@
 <?php
 require('fpdf/fpdf.php');
 
+
 $registro = "";
 $titulo = "";
 $fecha = "";
@@ -77,10 +78,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <title>Evaluación para Propuestas de Trabajo Terminal</title>
     <link rel="stylesheet" type="text/css" href="styles4.css">
+    <link rel="stylesheet" type="text/css" href="styles2.css">
+    <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body>
     <div class="header">
         <h1>Evaluación para Propuestas de Trabajo Terminal</h1>
+        <a href="lista_academia.php" class="regresar">Regresar</a>
     </div>
 
     <div class="container">

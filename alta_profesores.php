@@ -17,7 +17,7 @@ $resultado = mysqli_query($conexion, $query);
         </div>
         <div class="botones">
             <a href="perfil.php">Perfil</a>
-            <a href="cerrar_sesion.php">Cerrar sesión</a>
+            <a href="login.php">Cerrar sesión</a>
         </div>
     </header>
 
@@ -63,10 +63,6 @@ $resultado = mysqli_query($conexion, $query);
             </tbody>
         </table>
     </main>
-
-    <footer>
-        <p>Derechos reservados 2021</p>
-    </footer>
 
     <script>
         const botonesGuardar = document.querySelectorAll('.guardar');
