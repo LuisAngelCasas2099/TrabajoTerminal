@@ -1,6 +1,9 @@
 <?php
 require('fpdf/fpdf.php');
+session_start();
+require('conexion.php'); // Asegúrate de incluir el archivo de conexión a la base de datos
 
+$correo_usuario = $_SESSION['correo'];
 
 $registro = "";
 $titulo = "";
@@ -9,6 +12,8 @@ $respuestas = [];
 $observaciones = [];
 $aprobado = "";
 $recomendaciones = "";
+$pdf_path = "";
+$message = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $registro = $_POST['registro'];
@@ -26,20 +31,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $aprobado = $_POST['aprobado'];
     $recomendaciones = $_POST['recomendaciones'];
 
-    // Crear PDF
     $pdf = new FPDF();
     $pdf->AddPage();
 
+ 
+    $pdf->Image('encabezado.png', 10, 10, 190);
+    $pdf->Ln(20); // Añadir espacio después de la imagen
+
     // Encabezado
-    $pdf->SetFont('Arial','B',14);
-    $pdf->Cell(0,10,'Resultados de la Evaluacion',0,1,'C');
+    $pdf->SetFont('Arial', 'B', 14);
+    $pdf->MultiCell(0, 10, utf8_decode('Evaluación para Propuestas de Trabajo Terminal'), 0, 'L');
     $pdf->Ln(10);
 
     // Información del formulario
-    $pdf->SetFont('Arial','',12);
-    $pdf->Cell(0,10,'Núm. de Registro del TT: '.$registro,0,1);
-    $pdf->Cell(0,10,'Título del TT: '.$titulo,0,1);
-    $pdf->Cell(0,10,'Fecha de evaluación: '.$fecha,0,1);
+    $pdf->SetFont('Arial', '', 12);
+    $pdf->SetTextColor(0, 0, 0); // Texto negro
+    $pdf->MultiCell(0, 10, utf8_decode('Núm. de Registro del TT: ' . $registro), 0, 'L');
+    $pdf->MultiCell(0, 10, utf8_decode('Título del TT: ' . $titulo), 0, 'L');
+    $pdf->MultiCell(0, 10, utf8_decode('Fecha de evaluación: ' . $fecha), 0, 'L');
     $pdf->Ln(10);
 
     // Respuestas y observaciones
@@ -56,22 +65,77 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         "¿El calendario de actividades por estudiantes es adecuado?"
     ];
 
+    $pdf->SetFont('Arial', '', 12);
     for ($i = 1; $i <= 10; $i++) {
-        $pdf->Cell(0,10,$i.'. '.$preguntas[$i-1].': '.$respuestas[$i],0,1);
-        $pdf->Cell(0,10,'Observaciones: '.$observaciones[$i],0,1);
-        $pdf->Ln(5);
+        $pdf->SetTextColor(0, 0, 0); // Texto negro
+        $pdf->MultiCell(0, 10, utf8_decode($i . '. ' . $preguntas[$i - 1] . ' ' . $respuestas[$i]), 0, 'L');
+        $pdf->SetTextColor(0, 0, 0); // Texto negro
+        $pdf->MultiCell(0, 10, utf8_decode('Observaciones: ' . $observaciones[$i]), 0, 'L');
+        $pdf->Ln(0.5); // Reducir espacio entre líneas
     }
 
     // Aprobado y recomendaciones
-    $pdf->Cell(0,10,'APROBADO: '.$aprobado,0,1);
-    $pdf->Cell(0,10,'Recomendaciones adicionales: '.$recomendaciones,0,1);
+    $pdf->SetTextColor(0, 0, 0); // Texto negro
+    $pdf->MultiCell(0, 10, utf8_decode('APROBADO: ' . $aprobado), 0, 'L');
+    $pdf->MultiCell(0, 10, utf8_decode('Recomendaciones adicionales: ' . $recomendaciones), 0, 'L');
 
-    // Guardar PDF
-    $pdf->Output('F', 'evaluacion.pdf');
-    echo 'PDF generado exitosamente. <a href="evaluacion.pdf" download>Descargar PDF</a>';
+    // Guardar PDF temporalmente
+    $pdf_path = 'acuses/evaluacion_' . uniqid() . '.pdf';
+    $pdf->Output('F', $pdf_path);
+
+    // Leer contenido del PDF
+    $pdf_content = file_get_contents($pdf_path);
+
+    // Determinar la columna sinodal libre
+    $query = "SELECT sinodal1, sinodal2, sinodal3 FROM acuses WHERE numeroTT = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $registro);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $stmt->close();
+
+    $sinodal_col = null;
+    $acuse_col = null;
+    $nombre_col = null;
+    $aprobado_col = null;
+    if (empty($row['sinodal1'])) {
+        $sinodal_col = 'sinodal1';
+        $acuse_col = 'acuses1';
+        $nombre_col = 'nombrea1';
+        $aprobado_col = 'aprobado1';
+    } elseif (empty($row['sinodal2'])) {
+        $sinodal_col = 'sinodal2';
+        $acuse_col = 'acuses2';
+        $nombre_col = 'nombrea2';
+        $aprobado_col = 'aprobado2';
+    } elseif (empty($row['sinodal3'])) {
+        $sinodal_col = 'sinodal3';
+        $acuse_col = 'acuses3';
+        $nombre_col = 'nombrea3';
+        $aprobado_col = 'aprobado3';
+    }
+
+    if ($sinodal_col && $acuse_col && $nombre_col && $aprobado_col) {
+        $stmt = $conn->prepare("UPDATE acuses SET $sinodal_col = ?, $acuse_col = ?, $nombre_col = ?, $aprobado_col = ? WHERE numeroTT = ?");
+        $null = NULL;
+        $stmt->bind_param("sbssi", $correo_usuario, $null, $pdf_path, $aprobado, $registro);
+        $stmt->send_long_data(1, $pdf_content);
+
+        if ($stmt->execute()) {
+            $message = "PDF guardado exitosamente.";
+        } else {
+            $message = "Error al guardar el PDF: " . $stmt->error;
+        }
+
+        $stmt->close();
+    } else {
+        $message = "No hay espacio libre para agregar el sinodal.";
+    }
+
+    $conn->close();
 }
 ?>
-
 
 <!DOCTYPE html>
 <html>
@@ -114,41 +178,44 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     "¿El calendario de actividades por estudiantes es adecuado?"
                 ];
                 for ($i = 1; $i <= 10; $i++): ?>
-                    <label for="pregunta<?= $i ?>"> <?= $i ?>. <?= $preguntas[$i-1] ?></label>
-                    <select id="pregunta<?= $i ?>" name="pregunta<?= $i ?>">
-                        <option value="SI" <?= (isset($respuestas[$i]) && $respuestas[$i] == "SI") ? "selected" : "" ?>>SI</option>
-                        <option value="NO" <?= (isset($respuestas[$i]) && $respuestas[$i] == "NO") ? "selected" : "" ?>>NO</option>
-                    </select><br>
+                    <label for="pregunta<?= $i ?>"><?= $preguntas[$i - 1] ?></label><br>
+                    <input type="radio" id="pregunta<?= $i ?>_si" name="pregunta<?= $i ?>" value="SI" required <?= isset($respuestas[$i]) && $respuestas[$i] == 'SI' ? 'checked' : '' ?>>
+                    <label for="pregunta<?= $i ?>_si">SI</label>
+                    <input type="radio" id="pregunta<?= $i ?>_no" name="pregunta<?= $i ?>" value="NO" required <?= isset($respuestas[$i]) && $respuestas[$i] == 'NO' ? 'checked' : '' ?>>
+                    <label for="pregunta<?= $i ?>_no">NO</label><br>
                     <label for="observaciones<?= $i ?>">Observaciones:</label><br>
-                    <textarea id="observaciones<?= $i ?>" name="observaciones<?= $i ?>" rows="4"><?= isset($observaciones[$i]) ? htmlspecialchars($observaciones[$i]) : '' ?></textarea>
-                    <br><br>
+                    <textarea id="observaciones<?= $i ?>" name="observaciones<?= $i ?>" rows="2"><?= htmlspecialchars($observaciones[$i] ?? '') ?></textarea><br><br>
                 <?php endfor; ?>
 
                 <label for="aprobado">APROBADO:</label>
-                <select id="aprobado" name="aprobado">
-                    <option value="SI" <?= ($aprobado == "SI") ? "selected" : "" ?>>SI</option>
-                    <option value="NO" <?= ($aprobado == "NO") ? "selected" : "" ?>>NO</option>
-                </select><br><br>
+                <input type="radio" id="aprobado_si" name="aprobado" value="SI" required <?= $aprobado == 'SI' ? 'checked' : '' ?>>
+                <label for="aprobado_si">SI</label>
+                <input type="radio" id="aprobado_no" name="aprobado" value="NO" required <?= $aprobado == 'NO' ? 'checked' : '' ?>>
+                <label for="aprobado_no">NO</label><br><br>
 
                 <label for="recomendaciones">Recomendaciones adicionales:</label><br>
                 <textarea id="recomendaciones" name="recomendaciones" rows="4"><?= htmlspecialchars($recomendaciones) ?></textarea><br><br>
 
-                <input type="submit" value="Enviar Evaluación">
+                <input type="submit" value="Guardar">
+                <?php if ($pdf_path): ?>
+                    <a href="<?= $pdf_path ?>" download="evaluacion.pdf" class="btn">Descargar PDF</a>
+                <?php endif; ?>
+                <?php if ($message): ?>
+        <div class="message">
+        <p>Protocolo guardado correctamente.</p>
+        </div>
+    <?php endif; ?>
             </form>
-            <?php if ($_SERVER["REQUEST_METHOD"] == "POST"): ?>
-                <h2>Resultados de la Evaluación:</h2>
-                <p>Núm. de Registro del TT: <?= htmlspecialchars($registro) ?></p>
-                <p>Título del TT: <?= htmlspecialchars($titulo) ?></p>
-                <p>Fecha de evaluación: <?= htmlspecialchars($fecha) ?></p>
-                <?php for ($i = 1; $i <= 10; $i++): ?>
-                    <p><?= $i ?>. <?= $preguntas[$i-1] ?>: <?= htmlspecialchars($respuestas[$i]) ?></p>
-                    <p>Observaciones: <?= htmlspecialchars($observaciones[$i]) ?></p>
-                <?php endfor; ?>
-                <p>APROBADO: <?= htmlspecialchars($aprobado) ?></p>
-                <p>Recomendaciones adicionales: <?= htmlspecialchars($recomendaciones) ?></p>
-            <?php endif; ?>
         </div>
     </div>
-
 </body>
 </html>
+>
+
+
+
+
+
+
+
+

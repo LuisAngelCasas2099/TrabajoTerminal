@@ -21,17 +21,19 @@ if ($resultado->num_rows > 0) {
 }
 
 $opciones = array(
-    "Ciencias sociales",
-    "Ciencias básicas",
-    "Ingeniería de software",
-    "Ciencias de la computación",
-    "Sistemas distribuidos",
-    "Sistemas digitales",
-    "Fundamentos de sistemas electrónicos",
-    "Inteligencia artificial",
-    "Ciencia de datos",
-    "Proyectos estratégicos y toma de decisiones"
+    "Ciencias sociales" => 1,
+    "Ciencias básicas" => 2,
+    "Ingeniería de software" => 3,
+    "Ciencias de la computación" => 4,
+    "Sistemas distribuidos" => 5,
+    "Sistemas digitales" => 6,
+    "Fundamentos de sistemas electrónicos" => 7,
+    "Inteligencia artificial" => 8,
+    "Ciencia de datos" => 9,
+    "Proyectos estratégicos y toma de decisiones" => 10
 );
+
+$mensaje = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ac1 = $_POST['ac1'];
@@ -39,19 +41,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ac3 = $_POST['ac3'];
     $numeroTT = $_POST['numeroTT'];
 
-    $stmt = $conn->prepare("UPDATE protocolos SET Ac1 = ?, Ac2 = ?, Ac3 = ?, numeroTT = ? WHERE nombre_archivo = ?");
-    $stmt->bind_param("sssss", $ac1, $ac2, $ac3, $numeroTT, $archivo);
+    // Mapear las opciones seleccionadas a sus valores numéricos
+    $ac1_val = $opciones[$ac1];
+    $ac2_val = $opciones[$ac2];
+    $ac3_val = $opciones[$ac3];
 
-    if ($stmt->execute()) {
-        header("Location: lista_asignacion.php");
-        exit();
+    // Verificar que el número de Trabajo Terminal existe en la tabla `acuses`
+    $stmt = $conn->prepare("SELECT numeroTT FROM acuses WHERE numeroTT = ?");
+    $stmt->bind_param("s", $numeroTT);
+    $stmt->execute();
+    $resultado = $stmt->get_result();
+
+    if ($resultado->num_rows > 0) {
+        // El número de TT ya existe en `acuses`, realizar la actualización en `protocolos`
+        $stmt = $conn->prepare("UPDATE protocolos SET Ac1 = ?, Ac2 = ?, Ac3 = ?, numeroTT = ? WHERE nombre_archivo = ?");
+        $stmt->bind_param("sssss", $ac1_val, $ac2_val, $ac3_val, $numeroTT, $archivo);
+
+        if ($stmt->execute()) {
+            header("Location: lista_asignacion.php");
+            exit();
+        } else {
+            $mensaje = "Error al asignar protocolo: " . $stmt->error;
+        }
     } else {
-        echo "Error al asignar protocolo: " . $conn->error;
+        // El número de TT no existe en `acuses`, insertarlo y actualizar `protocolos`
+        $conn->begin_transaction();
+        try {
+            $stmt = $conn->prepare("INSERT INTO acuses (numeroTT) VALUES (?)");
+            $stmt->bind_param("s", $numeroTT);
+
+            if ($stmt->execute()) {
+                $stmt = $conn->prepare("UPDATE protocolos SET Ac1 = ?, Ac2 = ?, Ac3 = ?, numeroTT = ? WHERE nombre_archivo = ?");
+                $stmt->bind_param("sssss", $ac1_val, $ac2_val, $ac3_val, $numeroTT, $archivo);
+
+                if ($stmt->execute()) {
+                    $conn->commit();
+                    header("Location: lista_asignacion.php");
+                    exit();
+                } else {
+                    $conn->rollback();
+                    $mensaje = "Error al asignar protocolo: " . $stmt->error;
+                }
+            } else {
+                $conn->rollback();
+                $mensaje = "Error al insertar en acuses: " . $stmt->error;
+            }
+        } catch (Exception $e) {
+            $conn->rollback();
+            $mensaje = "Transaction failed: " . $e->getMessage();
+        }
     }
+    $stmt->close();
 } else {
-    $ac1 = $fila['Ac1'];
-    $ac2 = $fila['Ac2'];
-    $ac3 = $fila['Ac3'];
+    $ac1 = array_search($fila['Ac1'], $opciones);
+    $ac2 = array_search($fila['Ac2'], $opciones);
+    $ac3 = array_search($fila['Ac3'], $opciones);
     $numeroTT = $fila['numeroTT'];
 }
 ?>
@@ -168,21 +212,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form id="asignarForm" method="post">
                 <label for="ac1">Academia 1:</label>
                 <select id="ac1" name="ac1">
-                    <?php foreach ($opciones as $opcion) : ?>
+                    <?php foreach ($opciones as $opcion => $valor) : ?>
                         <option value="<?php echo htmlspecialchars($opcion); ?>" <?php echo ($ac1 === $opcion) ? 'selected' : ''; ?>><?php echo htmlspecialchars($opcion); ?></option>
                     <?php endforeach; ?>
                 </select>
 
                 <label for="ac2">Academia 2:</label>
                 <select id="ac2" name="ac2">
-                    <?php foreach ($opciones as $opcion) : ?>
+                    <?php foreach ($opciones as $opcion => $valor) : ?>
                         <option value="<?php echo htmlspecialchars($opcion); ?>" <?php echo ($ac2 === $opcion) ? 'selected' : ''; ?>><?php echo htmlspecialchars($opcion); ?></option>
                     <?php endforeach; ?>
                 </select>
 
                 <label for="ac3">Academia 3:</label>
                 <select id="ac3" name="ac3">
-                    <?php foreach ($opciones as $opcion) : ?>
+                    <?php foreach ($opciones as $opcion => $valor) : ?>
                         <option value="<?php echo htmlspecialchars($opcion); ?>" <?php echo ($ac3 === $opcion) ? 'selected' : ''; ?>><?php echo htmlspecialchars($opcion); ?></option>
                     <?php endforeach; ?>
                 </select>
@@ -193,7 +237,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="submit" value="Guardar">
             </form>
 
-            <?php if (isset($mensaje)) : ?>
+            <?php if (!empty($mensaje)) : ?>
                 <div class="mensaje">
                     <?php echo $mensaje; ?>
                 </div>

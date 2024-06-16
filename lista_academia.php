@@ -12,8 +12,7 @@ $username = "Admin";
 $password = "gamer4life";
 $dbname = "basededatos";
 
-
-$id = $_SESSION['id'];
+$correo = $_SESSION['correo'];
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
@@ -21,8 +20,21 @@ if ($conn->connect_error) {
     die("Error de conexión a la base de datos: " . $conn->connect_error);
 }
 
-// Consulta para obtener los protocolos
-$stmt = $conn->prepare("SELECT * FROM protocolos WHERE Ac1 = 0 AND Ac2 = 0 AND Ac3 = 0");
+// Obtener las academias del usuario según su correo
+$stmt = $conn->prepare("SELECT academia1, academia2, academia3 FROM usuarios WHERE correo = ?");
+$stmt->bind_param("s", $correo);
+$stmt->execute();
+$stmt->bind_result($academia1, $academia2, $academia3);
+$stmt->fetch();
+$stmt->close();
+
+// Consulta para obtener los protocolos filtrados por las academias del usuario
+$stmt = $conn->prepare("
+    SELECT * FROM protocolos
+    WHERE (Ac1 = ? OR Ac1 = ? OR Ac1 = ?)
+       OR (Ac2 = ? OR Ac2 = ? OR Ac2 = ?)
+       OR (Ac3 = ? OR Ac3 = ? OR Ac3 = ?)");
+$stmt->bind_param("iiiiiiiii", $academia1, $academia2, $academia3, $academia1, $academia2, $academia3, $academia1, $academia2, $academia3);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -34,6 +46,28 @@ if ($result->num_rows > 0) {
 }
 
 $conn->close();
+
+// Mapeo de las academias
+$academias_map = array(
+    1 => "Ciencias sociales",
+    2 => "Ciencias básicas",
+    3 => "Ingeniería de software",
+    4 => "Ciencias de la computación",
+    5 => "Sistemas distribuidos",
+    6 => "Sistemas digitales",
+    7 => "Fundamentos de sistemas electrónicos",
+    8 => "Inteligencia artificial",
+    9 => "Ciencia de datos",
+    10 => "Proyectos estratégicos y toma de decisiones"
+);
+
+function obtenerNombreAcademias($ac1, $ac2, $ac3, $map) {
+    $academias = [];
+    if (isset($map[$ac1])) $academias[] = $map[$ac1];
+    if (isset($map[$ac2])) $academias[] = $map[$ac2];
+    if (isset($map[$ac3])) $academias[] = $map[$ac3];
+    return implode(", ", $academias);
+}
 ?>
 
 <!DOCTYPE html>
@@ -65,21 +99,24 @@ $conn->close();
 </head>
 <body>
     <div class="header">
+        <div class="mensaje-bienvenida">
+            <h2>Bienvenido, <?php if ($_SESSION['id'] == 0) { echo "docente"; } elseif ($_SESSION['id'] == 3) { echo "jefe"; } ?></h2>
+        </div>
         <h1>Lista de Protocolos</h1>
         <div class="dropdown">
             <button class="dropbtn">Menú</button>
             <div class="dropdown-content">
-                <?php if ($id == 3 || $id == 4): ?>
+                <?php if ($_SESSION['id'] == 3 || $_SESSION['id'] == 4): ?>
                     <a href="lista_asignacion.php">Lista Protocolos</a>
                 <?php endif; ?>
-                <?php if ($id == 0): ?>
+                <?php if ($_SESSION['id'] == 0): ?>
                     <a href="lista_academia.php">Lista Protocolos</a>
                 <?php endif; ?>
-                <?php if ($id == 3 || $id == 4): ?>
+                <?php if ($_SESSION['id'] == 3 || $_SESSION['id'] == 4): ?>
                     <a href="alta_profesores.php">Alta de profesores</a>
                 <?php endif; ?>
                 <a href="perfil.php">Perfil</a>
-                <?php if ($id == 1): ?>
+                <?php if ($_SESSION['id'] == 1): ?>
                     <a href="registroProtocolo.php">Registro de Protocolo</a>
                 <?php endif; ?>
                 <a href="login.php">Cerrar Sesión</a>
@@ -91,6 +128,7 @@ $conn->close();
         <tr>
             <th>Título</th>
             <th>Archivo</th>
+            <th>Academias</th>
             <th>Acciones</th>
         </tr>
         <?php if (!empty($protocolos)) : ?>
@@ -98,6 +136,7 @@ $conn->close();
                 <tr>
                     <td><?php echo htmlspecialchars($protocolo['titulo']); ?></td>
                     <td><?php echo htmlspecialchars($protocolo['nombre_archivo']); ?></td>
+                    <td><?php echo htmlspecialchars(obtenerNombreAcademias($protocolo['Ac1'], $protocolo['Ac2'], $protocolo['Ac3'], $academias_map)); ?></td>
                     <td>
                         <a href="visualizador.php?archivo=<?php echo urlencode($protocolo['nombre_archivo']); ?>">Visualizar Protocolo</a>
                     </td>
@@ -105,7 +144,7 @@ $conn->close();
             <?php endforeach; ?>
         <?php else: ?>
             <tr>
-                <td colspan="3">No hay protocolos disponibles para evaluar</td>
+                <td colspan="4">No hay protocolos disponibles para evaluar</td>
             </tr>
         <?php endif; ?>
     </table>

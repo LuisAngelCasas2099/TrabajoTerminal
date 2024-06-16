@@ -21,13 +21,14 @@ $telefono = $_POST['telefono'];
 $contrasena = $_POST['contrasena'];
 
 // Asignar el valor correspondiente a la columna "id" de la tabla "usuarios"
-if (strpos($correo, '@alumno.ipn.mx') !== false) {
+if (strpos($correo, '@alumno.ipn.mx') !== false || strpos($correo, '@Alumnoguinda.ipn.mx') !== false) {
     $id = 1;
 } elseif (strpos($correo, '@ipn.mx') !== false) {
     $id = 0;
 } else {
     $id = null;
 }
+
 
 // Insertar los datos en la base de datos
 $sql = "INSERT INTO usuarios (nombre, apellido, boleta, correo, telefono, contrasena, id) VALUES ('$nombre', '$apellido', '$boleta', '$correo', '$telefono', '$contrasena', '$id')";

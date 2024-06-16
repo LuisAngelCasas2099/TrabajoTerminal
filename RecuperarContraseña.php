@@ -22,13 +22,13 @@
 </head>
 <body>
     <div class="header">
-        <!-- Contenido del encabezado -->
+        <h1> Recuperación de contraseña</h1>
     </div>
 
     <div class="container">
         <h2>Recuperar Contraseña</h2>
         <div class="success-message">Se ha enviado un correo</div>
-        <div class="error-message">Correo no registrado</div>
+        <div class="error-message">Correo no registrado o error al enviar el correo</div>
         
         <form method="post" action="verificar_correo.php">
             <label for="email">Correo electrónico:</label>
@@ -37,10 +37,6 @@
         </form>
         <br>
         <a href="Login.php">Regresar al inicio</a>
-    </div>
-
-    <div class="footer">
-        <!-- Contenido del pie de página -->
     </div>
 </body>
 </html>

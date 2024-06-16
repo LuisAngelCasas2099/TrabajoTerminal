@@ -67,11 +67,31 @@ $conn->close();
             width: 100%;
             height: 100%;
         }
+
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 2px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
     </style>
 </head>
 
 <body>
     <div class="header">
+        <div class="mensaje-bienvenida">
+            <h2>Bienvenido, <?php if ($id == 0) {
+                echo "docente";
+            } elseif ($id == 3) {
+                echo "jefe";
+            } ?>
+        </div>
         <h1>Lista de Protocolos</h1>
         <div class="dropdown">
             <button class="dropbtn">Menú</button>
@@ -99,8 +119,8 @@ $conn->close();
             <th>Título</th>
             <th>Archivo</th>
             <th>Palabras clave</th>
-            <th>Acciones</th>
-            
+            <th>Asignar</th>
+            <th>Reasignar</th>
         </tr>
         <?php if (!empty($protocolos)) : ?>
             <?php foreach ($protocolos as $protocolo): ?>
@@ -111,14 +131,21 @@ $conn->close();
                     <td>
                         <a href="asignar_protocolo.php?archivo=<?php echo htmlspecialchars($protocolo['nombre_archivo']); ?>">Asignar Protocolo</a>
                     </td>
+                    <td>
+                        <a href="asignar_protocolo.php?archivo=<?php echo htmlspecialchars($protocolo['nombre_archivo']); ?>">Reasignar Protocolo</a>
+                    </td>
                 </tr>
             <?php endforeach; ?>
         <?php else: ?>
             <tr>
-                <td colspan="3">No hay protocolos disponibles para asignar</td>
+                <td colspan="4">No hay protocolos disponibles para asignar</td>
             </tr>
         <?php endif; ?>
     </table>
+
+    <form action="enviar_notificacion.php" method="post" style="text-align: center; margin-top: 20px;">
+        <button type="submit" class="button">Enviar notificación</button>
+    </form>
 </body>
 
 </html>

@@ -7,6 +7,7 @@ if (!isset($_SESSION['nombre'])) {
 }
 
 $id = $_SESSION['id'];
+$protocoloRegistrado = false; // Flag para verificar si el protocolo fue registrado
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Establecer la conexión a la base de datos
@@ -69,6 +70,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($stmt->execute()) {
             $idP = $stmt->insert_id;
+            $protocoloRegistrado = true; // Señalización de que el protocolo fue registrado
         } else {
             echo "Hubo un error al insertar el protocolo en la base de datos.";
         }
@@ -90,8 +92,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($uploadOk == 1) {
         if (move_uploaded_file($_FILES["documento_pdf"]["tmp_name"], $target_file)) {
-            header("Location: perfil.php");
-            exit();
+            // No redirigir aquí, manejaremos la redirección con JavaScript
         } else {
             echo "Hubo un error al subir el archivo.";
         }
@@ -161,6 +162,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 preview.src = e.target.result;
             };
             reader.readAsDataURL(file);
+        }
+        
+        function mostrarMensaje() {
+            alert("Protocolo registrado correctamente");
+            window.location.href = "perfil.php";
         }
     </script>
 </head>
@@ -234,6 +240,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </form>
         </div>
     </div>
+
+    <?php if ($protocoloRegistrado): ?>
+        <script>
+            mostrarMensaje();
+        </script>
+    <?php endif; ?>
 </body>
 
 </html>

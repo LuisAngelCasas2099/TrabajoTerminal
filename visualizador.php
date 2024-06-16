@@ -1,4 +1,12 @@
 <?php
+session_start();
+
+// Verificar si el archivo está bloqueado
+if (isset($_SESSION['archivo_bloqueado']) && $_SESSION['archivo_bloqueado']) {
+    header("Location: lista_academias.php");
+    exit();
+}
+
 // Opciones para los menús desplegables
 $opciones = array(
     "Ciencias Sociales",
@@ -107,12 +115,46 @@ $archivo = isset($_GET['archivo']) ? $_GET['archivo'] : '';
         .evaluar-btn:hover {
             background-color: #45a049;
         }
+
+        .bloquear-btn {
+            background-color: #f44336;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+
+        .bloquear-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        .desbloquear-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+
+        .desbloquear-btn:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>Visualizador</h1>
-        <a href="evaluacionProtocolos.php" class="evaluar-btn">Evaluar</a>
+        <a href="#" class="evaluar-btn">Evaluar</a>
+        <a href="#" class="bloquear-btn">Bloquear</a>
+        <a href="#" class="desbloquear-btn" style="display: none;">Desbloquear</a>
     </div>
 
     <div class="main-container">
@@ -124,5 +166,31 @@ $archivo = isset($_GET['archivo']) ? $_GET['archivo'] : '';
             <?php endif; ?>
         </div>
     </div>
+
+    <script>
+        const bloquearBtn = document.querySelector('.bloquear-btn');
+        const desbloquearBtn = document.querySelector('.desbloquear-btn');
+        const pdfContainer = document.querySelector('.pdf-container');
+
+        bloquearBtn.addEventListener('click', () => {
+            if (confirm('¿Estás seguro de que deseas bloquear este archivo?')) {
+                pdfContainer.style.display = 'none';
+                bloquearBtn.style.display = 'none';
+                desbloquearBtn.style.display = 'inline-block';
+                alert('El archivo ha sido bloqueado.');
+                // Establecer la variable de sesión para indicar que el archivo está bloqueado
+                <?php $_SESSION['archivo_bloqueado'] = true; ?>
+            }
+        });
+
+        desbloquearBtn.addEventListener('click', () => {
+            pdfContainer.style.display = 'block';
+            bloquearBtn.style.display = 'inline-block';
+            desbloquearBtn.style.display = 'none';
+            alert('El archivo ha sido desbloqueado.');
+            // Establecer la variable de sesión para indicar que el archivo no está bloqueado
+            <?php $_SESSION['archivo_bloqueado'] = false; ?>
+        });
+    </script>
 </body>
 </html>
